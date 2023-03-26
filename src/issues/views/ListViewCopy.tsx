@@ -1,14 +1,14 @@
 import { useState } from "react";
 
+import { useIssueInfiniteScroll } from "../../hooks/useIssueInfiniteScroll";
 import { IssueList, LabelPicker } from "../components";
 import { Loading } from "../../components/Loading";
-import { useIssues } from "../../hooks/useIssues";
 import { State } from "../../interfaces/issue";
 
-export const ListView = () => {
+export const ListViewCopy = () => {
   const [state, setState] = useState<State>();
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
-  const { issuesQuery, page, nextPage, prevPage } = useIssues({
+  const { issuesQuery } = useIssueInfiniteScroll({
     state,
     selectedLabels,
   });
@@ -27,27 +27,19 @@ export const ListView = () => {
           <Loading />
         ) : (
           <IssueList
-            issues={issuesQuery.data}
+            issues={issuesQuery.data?.pages.flat() || []}
             state={state}
             onChangeState={(newState?: State) => setState(newState)}
           />
         )}
 
-        <div className="d-flex justify-content-between mt-2">
+        <div className="mt-2">
           <button
             className="btn btn-outline-primary"
-            onClick={prevPage}
-            disabled={issuesQuery.isFetching}
+            disabled={ !issuesQuery.hasNextPage}
+            onClick={() => issuesQuery.fetchNextPage()}
           >
-            Anterior
-          </button>
-          <span>{page}</span>
-          <button
-            className="btn btn-outline-primary"
-            onClick={nextPage}
-            disabled={issuesQuery.isFetching}
-          >
-            Siguiente
+            Cargar más
           </button>
         </div>
       </div>
